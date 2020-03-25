@@ -12,7 +12,7 @@ GPIO.setmode(GPIO.BOARD)
 
 GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.LOW)
 
-cmd = "scp pi@192.168.1.170:/home/pi/pi.jpg ."
+cmd = "scp pi@192.168.1.170:/home/pi/deepclean/pi.jpg ."
 
 
 def gstreamer_pipeline (capture_width=3280, capture_height=2464, display_width=img_width, display_height=img_height, framerate=21, flip_method=0) :
