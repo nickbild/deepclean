@@ -40,13 +40,29 @@ while True:
     imgR = cv2.imread('pi2.jpg', 0)
     stereo = cv2.StereoBM_create(numDisparities=32, blockSize=17)
     disparity = stereo.compute(imgL,imgR)
-    cv2.imwrite('result_distance.jpg', disparity)
+
+    # View disparity map.
+    # cv2.imwrite('result_distance.jpg', disparity)
 
     # Determine body position.
     imgLcolor = cv2.imread('pi1.jpg')
     datum = op.Datum()
     datum.cvInputData = imgLcolor
     opWrapper.emplaceAndPop([datum])
-    newImage = datum.cvOutputData[:, :, :]
-    cv2.imwrite("result_pose.jpg", newImage)
+
+    try:
+        # Wrist location.
+        print("R wrist: {}".format(datum.poseKeypoints[0][4])) # Right wrist [x, y, score].
+        print("L wrist: {}".format(datum.poseKeypoints[0][7])) # Left wrist [x, y, score].
+
+        # Disparity at wrist locations.
+        print(disparity[int(datum.poseKeypoints[0][4][0])][int(datum.poseKeypoints[0][4][1])])
+        print(disparity[int(datum.poseKeypoints[0][7][0])][int(datum.poseKeypoints[0][7][1])])
+
+    except:
+        print("No human detected.")
+
+    # View annotated pose image.
+    # newImage = datum.cvOutputData[:, :, :]
+    # cv2.imwrite("result_pose.jpg", newImage)
 
