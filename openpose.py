@@ -12,7 +12,7 @@ if __name__ == '__main__':
     opWrapper.configure(params)
     opWrapper.start()
 
-    dst = cv2.imread("test.jpg")
+    dst = cv2.imread("pi.jpg")
 
     datum = op.Datum()
     datum.cvInputData = dst
