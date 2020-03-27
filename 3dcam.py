@@ -32,20 +32,23 @@ while True:
         GPIO.output(output_pin, GPIO.LOW)
 
     # Retrieve images from Raspberry Pis.
-    for cmd in cmds:
-        call(cmd.split(" "))
+    #for cmd in cmds:
+        #call(cmd.split(" "))
 
     # Analyze stereo images.
-    imgL = cv2.imread('pi1.jpg', 0)
-    imgR = cv2.imread('pi2.jpg', 0)
-    stereo = cv2.StereoBM_create(numDisparities=32, blockSize=17)
+    imgL = cv2.imread('pi2.jpg', 0)
+    imgR = cv2.imread('pi1.jpg', 0)
+    stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
+    stereo.setTextureThreshold(20)
+    stereo.setSpeckleWindowSize(10)
+    stereo.setSpeckleRange(5)
     disparity = stereo.compute(imgL,imgR)
 
     # View disparity map.
-    # cv2.imwrite('result_distance.jpg', disparity)
+    cv2.imwrite('result_distance.jpg', disparity)
 
     # Determine body position.
-    imgLcolor = cv2.imread('pi1.jpg')
+    imgLcolor = cv2.imread('pi2.jpg')
     datum = op.Datum()
     datum.cvInputData = imgLcolor
     opWrapper.emplaceAndPop([datum])
