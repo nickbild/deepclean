@@ -32,6 +32,8 @@ for fname in images:
 
     # If found, add object points, image points (after refining them)
     if retL and retR:
+        print(fname)
+
         objpoints.append(objp)
 
         cornersL2 = cv2.cornerSubPix(grayL, cornersL, (11,11), (-1,-1), criteria)
