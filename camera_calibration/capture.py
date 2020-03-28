@@ -15,7 +15,7 @@ for output_pin in output_pins:
 cmds = ["scp pi@192.168.1.170:/home/pi/deepclean/pi.jpg pi1.jpg", 
         "scp pi@192.168.1.171:/home/pi/deepclean/pi.jpg pi2.jpg"]
 
-cnt = 0
+cnt = 200
 while True:
     print(cnt)
     time.sleep(1)

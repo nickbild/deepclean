@@ -41,9 +41,11 @@ while True:
         time.sleep(0.001)
         GPIO.output(output_pin, GPIO.LOW)
 
+    time.sleep(0.25)
+
     # Retrieve images from Raspberry Pis.
-    #for cmd in cmds:
-        #call(cmd.split(" "))
+    for cmd in cmds:
+        call(cmd.split(" "))
 
     # Rectify stereo images.
     
@@ -51,7 +53,8 @@ while True:
     # Analyze stereo images.
     imgL = cv2.imread('pi2.jpg')
     imgR = cv2.imread('pi1.jpg')
-    stereo = cv2.StereoBM_create(numDisparities=32, blockSize=15)
+    #stereo = cv2.StereoBM_create(numDisparities=128, blockSize=15)
+    stereo = cv2.StereoSGBM_create(numDisparities=128, blockSize=15)
     
     fixedL = cv2.remap(imgL, leftMapX, leftMapY, cv2.INTER_LINEAR)
     fixedR = cv2.remap(imgR, rightMapX, rightMapY, cv2.INTER_LINEAR)
@@ -59,16 +62,21 @@ while True:
     grayL = cv2.cvtColor(fixedL, cv2.COLOR_BGR2GRAY)
     grayR = cv2.cvtColor(fixedR, cv2.COLOR_BGR2GRAY)
 
-    stereo.setMinDisparity(4)
-    stereo.setNumDisparities(32)
-    stereo.setBlockSize(15)
+    stereo.setMinDisparity(5)
     stereo.setSpeckleRange(10)
-    stereo.setSpeckleWindowSize(25)
+    stereo.setSpeckleWindowSize(15)
 
     disparity = stereo.compute(grayL, grayR)
 
+    #hv = min([sublist[-1] for sublist in disparity])
+    #print(hv)
+    #disparity = disparity * 3.1875
+
     # View disparity map.
     cv2.imwrite('result_distance.jpg', disparity)
+
+    #cv2.imwrite('left.jpg', grayL)
+    #cv2.imwrite('right.jpg', grayR)
 
     # Determine body position.
     datum = op.Datum()
