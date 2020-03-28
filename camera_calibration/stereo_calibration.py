@@ -67,7 +67,7 @@ h, w = grayL.shape[:2]
 newcameramtxL, roiL = cv2.getOptimalNewCameraMatrix(mtxL, distL, (w,h), 1, (w,h))
 newcameramtxR, roiR = cv2.getOptimalNewCameraMatrix(mtxR, distR, (w,h), 1, (w,h))
 
-# Rectify image.
+# Rectify image pair.
 img = cv2.imread("img/good/pi2_25_good.jpg")
 dst = cv2.undistort(img, mtxL, distL, None, newcameramtxL)
 x, y, w, h = roiL
@@ -82,34 +82,43 @@ print("{} {} {} {}".format(x, y, w, h))
 dst = dst[y:y+h, x:x+w]
 cv2.imwrite("img/pi1_25_rectified.jpg", dst)
 
-
-
-
-
-
-
-#
-# for fname in images:
-#     img = cv2.imread(fname)
-#
-#     # undistort
-#     dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
-#     # crop the image
-#     x, y, w, h = roi
-#     dst = dst[y:y+h, x:x+w]
-#     cv2.imshow('img', dst)
-#     cv2.waitKey(500)
-#
-# cv2.destroyAllWindows()
-#
 # # Now you can store the camera matrix and distortion coefficients using write functions in Numpy (np.savez, np.savetxt etc) for future uses.
 #
 #
-# #retval,cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, R, T, E, F = cv2.stereoCalibrate(objpointsL, imgpointsL, imgpointsR, (w,h))
-#
-# # Stereo rectification
-# retval, _, _, _, _, R, T, E, F=cv2.stereoCalibrate(all_3d_points,  all_left_corners, all_right_corners, (im.shape[1],im.shape[0]),mtx,dist,mtx,dist,flags=cv2.cv.CV_CALIB_FIX_INTRINSIC)
-#
+
+# Stereo calibration.
+#retval, cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpointsL, imgpointsR, (w,h))
+
+
+# Stereo calibration.
+
+#retval, _, _, _, _, R, T, E, F = cv2.stereoCalibrate(tuple(objpoints), tuple(imgpointsL), tuple(imgpointsR), (w,h), mtxL, tuple(distL[0]), mtxR, tuple(distR[0]), criteria = criteria, flags = cv2.CALIB_FIX_INTRINSIC|cv2.CALIB_SAME_FOCAL_LENGTH|cv2.CALIB_ZERO_TANGENT_DIST)
+
+retval, _, _, _, _, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpointsL, imgpointsR, mtxL, distL, mtxR, distR, (w,h), None, None, None, None, cv2.CALIB_FIX_INTRINSIC, criteria)
+
+# Stereo rectification.
+
+(leftRectification, rightRectification, leftProjection, rightProjection,
+        dispartityToDepthMap, leftROI, rightROI) = cv2.stereoRectify(
+                mtxL, distL,
+                mtxR, distR,
+                (w,h), R, T,
+                None, None, None, None, None,
+                cv2.CALIB_ZERO_DISPARITY, 0.25)
+
+leftMapX, leftMapY = cv2.initUndistortRectifyMap(
+        mtxL, distL, leftRectification,
+        leftProjection, (w,h), cv2.CV_32FC1)
+
+rightMapX, rightMapY = cv2.initUndistortRectifyMap(
+        mtxR, distR, rightRectification,
+        rightProjection, (w,h), cv2.CV_32FC1)
+
+np.savez_compressed("stereo_calibration.npz", imageSize=(w,h),
+        leftMapX=leftMapX, leftMapY=leftMapY, leftROI=leftROI,
+        rightMapX=rightMapX, rightMapY=rightMapY, rightROI=rightROI)
+
+
 # # Stereo calibration
 #
 # R1=cv2.cv.fromarray(np.zeros((3,3))) #output 3x3 matrix
