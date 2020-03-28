@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import cv2
 import glob
+import sys
 
 
 # termination criteria
@@ -16,7 +17,7 @@ objpoints = [] # 3d point in real world space
 imgpointsL = [] # 2d points in image plane.
 imgpointsR = [] # 2d points in image plane.
 
-images = glob.glob("img/pi2_*.jpg")
+images = glob.glob("img/good/pi2_*.jpg")
 
 for fname in images:
     imgL = cv2.imread(fname)
@@ -43,20 +44,50 @@ for fname in images:
         imgpointsR.append(cornersR)
 
         # Draw and display the corners
-        cv2.drawChessboardCorners(imgL, (7,6), cornersL2, retL)
-        cv2.imwrite('{}.corners.jpg'.format(fname), imgL)
+        #cv2.drawChessboardCorners(imgL, (7,6), cornersL2, retL)
+        #cv2.imwrite('{}.corners.jpg'.format(fname), imgL)
 
-        cv2.drawChessboardCorners(imgR, (7,6), cornersR2, retR)
-        cv2.imwrite('{}.corners.jpg'.format(fnameR), imgR)
+        #cv2.drawChessboardCorners(imgR, (7,6), cornersR2, retR)
+        #cv2.imwrite('{}.corners.jpg'.format(fnameR), imgR)
     else:
         print("NO: {}".format(fname))
 
-# # Calibrate
-# ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-#
-# w = 1024
-# h = 768
-# newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
+
+
+
+
+#sys.exit(0)
+
+
+# Calibrate individual images.
+retL, mtxL, distL, rvecsL, tvecsL = cv2.calibrateCamera(objpoints, imgpointsL, grayL.shape[::-1], None, None)
+retR, mtxR, distR, rvecsR, tvecsR = cv2.calibrateCamera(objpoints, imgpointsR, grayR.shape[::-1], None, None)
+
+h, w = grayL.shape[:2]
+newcameramtxL, roiL = cv2.getOptimalNewCameraMatrix(mtxL, distL, (w,h), 1, (w,h))
+newcameramtxR, roiR = cv2.getOptimalNewCameraMatrix(mtxR, distR, (w,h), 1, (w,h))
+
+# Rectify image.
+img = cv2.imread("img/good/pi2_25_good.jpg")
+dst = cv2.undistort(img, mtxL, distL, None, newcameramtxL)
+x, y, w, h = roiL
+print("{} {} {} {}".format(x, y, w, h))
+dst = dst[y:y+h, x:x+w]
+cv2.imwrite("img/pi2_25_rectified.jpg", dst)
+
+
+img = cv2.imread("img/good/pi1_25_good.jpg")
+dst = cv2.undistort(img, mtxR, distR, None, newcameramtxR)
+print("{} {} {} {}".format(x, y, w, h))
+dst = dst[y:y+h, x:x+w]
+cv2.imwrite("img/pi1_25_rectified.jpg", dst)
+
+
+
+
+
+
+
 #
 # for fname in images:
 #     img = cv2.imread(fname)
