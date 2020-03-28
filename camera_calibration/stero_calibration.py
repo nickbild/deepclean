@@ -16,7 +16,7 @@ objpoints = [] # 3d point in real world space
 imgpointsL = [] # 2d points in image plane.
 imgpointsR = [] # 2d points in image plane.
 
-images = glob.glob("img/pi2_*.jpg".format(host))
+images = glob.glob("img/pi2_*.jpg")
 
 for fname in images:
     imgL = cv2.imread(fname)
@@ -44,12 +44,12 @@ for fname in images:
 
         # Draw and display the corners
         cv2.drawChessboardCorners(imgL, (7,6), cornersL2, retL)
-        cv2.imshow('imgL', imgL)
-        cv2.waitKey(500)
+        cv2.imwrite('{}.corners.jpg'.format(fname), imgL)
 
         cv2.drawChessboardCorners(imgR, (7,6), cornersR2, retR)
-        cv2.imshow('imgR', imgR)
-        cv2.waitKey(500)
+        cv2.imwrite('{}.corners.jpg'.format(fnameR), imgR)
+    else:
+        print("NO: {}".format(fname))
 
 # # Calibrate
 # ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
