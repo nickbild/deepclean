@@ -24,6 +24,16 @@ opWrapper = op.WrapperPython()
 opWrapper.configure(params)
 opWrapper.start()
 
+# Load stereo calibration data.
+calibration = np.load("camera_calibration/stereo_calibration.npz", allow_pickle=False)
+imageSize = tuple(calibration["imageSize"])
+leftMapX = calibration["leftMapX"]
+leftMapY = calibration["leftMapY"]
+leftROI = tuple(calibration["leftROI"])
+rightMapX = calibration["rightMapX"]
+rightMapY = calibration["rightMapY"]
+rightROI = tuple(calibration["rightROI"])
+
 while True:
     # Capture images from Raspberry Pis.
     for output_pin in output_pins:
@@ -35,22 +45,34 @@ while True:
     #for cmd in cmds:
         #call(cmd.split(" "))
 
+    # Rectify stereo images.
+    
+
     # Analyze stereo images.
-    imgL = cv2.imread('pi2.jpg', 0)
-    imgR = cv2.imread('pi1.jpg', 0)
-    stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
-    stereo.setTextureThreshold(20)
-    stereo.setSpeckleWindowSize(10)
-    stereo.setSpeckleRange(5)
-    disparity = stereo.compute(imgL,imgR)
+    imgL = cv2.imread('pi2.jpg')
+    imgR = cv2.imread('pi1.jpg')
+    stereo = cv2.StereoBM_create(numDisparities=32, blockSize=15)
+    
+    fixedL = cv2.remap(imgL, leftMapX, leftMapY, cv2.INTER_LINEAR)
+    fixedR = cv2.remap(imgR, rightMapX, rightMapY, cv2.INTER_LINEAR)
+    
+    grayL = cv2.cvtColor(fixedL, cv2.COLOR_BGR2GRAY)
+    grayR = cv2.cvtColor(fixedR, cv2.COLOR_BGR2GRAY)
+
+    stereo.setMinDisparity(4)
+    stereo.setNumDisparities(32)
+    stereo.setBlockSize(15)
+    stereo.setSpeckleRange(10)
+    stereo.setSpeckleWindowSize(25)
+
+    disparity = stereo.compute(grayL, grayR)
 
     # View disparity map.
     cv2.imwrite('result_distance.jpg', disparity)
 
     # Determine body position.
-    imgLcolor = cv2.imread('pi2.jpg')
     datum = op.Datum()
-    datum.cvInputData = imgLcolor
+    datum.cvInputData = fixedL
     opWrapper.emplaceAndPop([datum])
 
     try:
