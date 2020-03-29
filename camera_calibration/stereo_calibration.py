@@ -55,7 +55,7 @@ for fname in images:
         #os.remove(fname)
         #os.remove(fnameR)
 
-sys.exit(0)
+# sys.exit(0)
 
 # Calibrate individual images.
 retL, mtxL, distL, rvecsL, tvecsL = cv2.calibrateCamera(objpoints, imgpointsL, grayL.shape[::-1], None, None)
@@ -72,7 +72,6 @@ x, y, w, h = roiL
 print("{} {} {} {}".format(x, y, w, h))
 dst = dst[y:y+h, x:x+w]
 cv2.imwrite("img/pi2_25_rectified.jpg", dst)
-
 
 img = cv2.imread("img/good/pi1_25_good.jpg")
 dst = cv2.undistort(img, mtxR, distR, None, newcameramtxR)
@@ -104,4 +103,3 @@ rightMapX, rightMapY = cv2.initUndistortRectifyMap(
 np.savez_compressed("stereo_calibration.npz", imageSize=(w,h),
         leftMapX=leftMapX, leftMapY=leftMapY, leftROI=leftROI,
         rightMapX=rightMapX, rightMapY=rightMapY, rightROI=rightROI)
-

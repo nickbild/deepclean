@@ -22,7 +22,7 @@ GPIO.setmode(GPIO.BOARD)
 for output_pin in output_pins:
     GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.LOW)
 
-cmds = ["scp pi@192.168.1.170:/home/pi/deepclean/pi.jpg pi1.jpg", 
+cmds = ["scp pi@192.168.1.170:/home/pi/deepclean/pi.jpg pi1.jpg",
         "scp pi@192.168.1.171:/home/pi/deepclean/pi.jpg pi2.jpg"]
 FNULL = open(os.devnull, 'w')
 
@@ -56,6 +56,7 @@ def drawTrail(trail, img):
 
     return img
 
+
 while True:
     # Capture images from Raspberry Pis.
     for output_pin in output_pins:
@@ -63,7 +64,7 @@ while True:
         time.sleep(0.001)
         GPIO.output(output_pin, GPIO.LOW)
 
-    #time.sleep(0.25)
+    time.sleep(0.1)
 
     # Retrieve images from Raspberry Pis.
     for cmd in cmds:
@@ -72,12 +73,11 @@ while True:
     # Rectify/analyze stereo images.
     imgL = cv2.imread('pi2.jpg')
     imgR = cv2.imread('pi1.jpg')
-    #stereo = cv2.StereoBM_create(numDisparities=128, blockSize=15)
     stereo = cv2.StereoSGBM_create(numDisparities=16, blockSize=1)
-    
+
     fixedL = cv2.remap(imgL, leftMapX, leftMapY, cv2.INTER_LINEAR)
     fixedR = cv2.remap(imgR, rightMapX, rightMapY, cv2.INTER_LINEAR)
-    
+
     grayL = cv2.cvtColor(fixedL, cv2.COLOR_BGR2GRAY)
     grayR = cv2.cvtColor(fixedR, cv2.COLOR_BGR2GRAY)
 
@@ -108,14 +108,14 @@ while True:
             #print(disparity[xR][yR])
             disparityLwrist = disparity[xR-20:xR+20, yR-20:yR+20]
             #print(disparityLwrist.mean())
-            
+
             # Remember past locations.
             if disparityLwrist.mean() < max_disparity_o1:
                 if (xR > 96 and xR < 231 and yR > 500):
                     trackRo1.append((xR-25, yR))
                 else:
                     trackRo2.append((xR-25, yR))
-        
+
         xL = int(datum.poseKeypoints[0][7][0])
         yL = int(datum.poseKeypoints[0][7][1])
         if (xL > 96 and xL < 231 and yL > 500) or (xL > 367 and xL < 489 and yL > 615):
@@ -154,4 +154,3 @@ while True:
     # View annotated pose image.
     # newImage = datum.cvOutputData[:, :, :]
     # cv2.imwrite("result_pose.jpg", newImage)
-
