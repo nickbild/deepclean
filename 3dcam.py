@@ -9,6 +9,10 @@ import os
 
 img_width = 1024
 img_height = 768
+
+max_disparity_o1 = 10
+max_disparity_o2 = 8
+
 output_pins = [22, 24]
 params = dict()
 params["model_folder"] = "/home/nick/software/openpose/openpose/models/"
@@ -40,6 +44,7 @@ trackLo1 = []
 trackLo2 = []
 trackRo1 = []
 trackRo2 = []
+vi = 0
 
 
 def drawTrail(trail, img):
@@ -58,7 +63,7 @@ while True:
         time.sleep(0.001)
         GPIO.output(output_pin, GPIO.LOW)
 
-    time.sleep(0.25)
+    #time.sleep(0.25)
 
     # Retrieve images from Raspberry Pis.
     for cmd in cmds:
@@ -102,13 +107,14 @@ while True:
             #print("Right ++++")
             #print(disparity[xR][yR])
             disparityLwrist = disparity[xR-20:xR+20, yR-20:yR+20]
-            print(disparityLwrist.mean())
+            #print(disparityLwrist.mean())
             
             # Remember past locations.
-            if (xR > 96 and xR < 231 and yR > 500):
-                trackRo1.append((xR, yR))
-            else:
-                trackRo2.append((xR, yR))
+            if disparityLwrist.mean() < max_disparity_o1:
+                if (xR > 96 and xR < 231 and yR > 500):
+                    trackRo1.append((xR-25, yR))
+                else:
+                    trackRo2.append((xR-25, yR))
         
         xL = int(datum.poseKeypoints[0][7][0])
         yL = int(datum.poseKeypoints[0][7][1])
@@ -116,13 +122,14 @@ while True:
             #print("Left ----")
             #print(disparity[xL][yL])
             disparityRwrist = disparity[xL-20:xL+20, yL-20:yL+20]
-            print(disparityRwrist.mean())
+            #print(disparityRwrist.mean())
 
             # Remember past locations.
-            if (xL > 96 and xL < 231 and yL > 500):
-                trackLo1.append((xL, yL))
-            else:
-                trackLo2.append((xL, yL))
+            if disparityRwrist.mean() < max_disparity_o2:
+                if (xL > 96 and xL < 231 and yL > 500):
+                    trackLo1.append((xL, yL))
+                else:
+                    trackLo2.append((xL, yL))
 
         # Draw wrist circles on image.
         #disparity = cv2.circle(disparity, (xR, yR), 20, (255, 0, 0), 2)
@@ -138,9 +145,11 @@ while True:
         print("No human detected.")
 
     # View disparity map.
-    cv2.imwrite('result_distance.jpg', disparity)
+    #cv2.imwrite('result_distance.jpg', disparity)
 
     cv2.imwrite('left.jpg', fixedL)
+    cv2.imwrite('video/left_{}.jpg'.format(vi), fixedL)
+    vi += 1
 
     # View annotated pose image.
     # newImage = datum.cvOutputData[:, :, :]
