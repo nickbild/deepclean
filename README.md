@@ -14,7 +14,7 @@ Coming soon!
 
 ## Media
 
-YouTube Video:
+YouTube Video:  
 https://www.youtube.com/watch?v=Qy8Ks7UTtrA
 
 ## Bill of Materials
