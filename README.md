@@ -10,7 +10,7 @@ One use case would be in a hospital room.  When a patient checks out, the cleani
 
 ## How it Works
 
-Deep Clean uses a stereo camera to detect the depth (z coordinate) of an object of interest (e.g. a hand) in the video frame.  OpenPose is used to detect hand location (x,y coordinates).  When a hand is at the same position and depth as another object in view (i.e. touching), that location is tracked.  An image can be generated showing all surfaces that have been touched.
+Deep Clean uses a stereo camera to detect the depth (z-coordinate) of an object of interest (e.g. a hand) in the video frame.  OpenPose is used to detect hand location (x,y-coordinates).  When a hand is at the same position and depth as another object in view (i.e. touching), that location is tracked.  An image can be generated showing all surfaces that have been touched.
 
 ### Camera
 
