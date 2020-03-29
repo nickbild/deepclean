@@ -2,7 +2,7 @@
 
 Deep Clean watches a room and flags all surfaces as they are touched for special attention on the next cleaning to help prevent the spread of contagious disease.
 
-One use case would be in a hospital room.  When a patient checks out, the cleaning service could view all surfaces that need special attention on a screen in the room.
+One use case would be in a hospital room.  When a patient checks out, the cleaning service could view all surfaces that need special attention.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/nickbild/deepclean/master/media/teaser.gif">
@@ -10,7 +10,17 @@ One use case would be in a hospital room.  When a patient checks out, the cleani
 
 ## How it Works
 
-Coming soon!
+Deep Clean uses a stereo camera to detect the depth of an object of interest (e.g. a hand) in the video frame.  OpenPose is used to detect hand location.  When a hand is at the same position and depth as another object in view (i.e. touching), that location is tracked.  An image can be generated showing all surfaces that have been touched.
+
+### Camera
+
+Camera options for the Xavier tend to be on the expensive side for a hobbyist, so I built my own from a pair of Raspberry Pi cameras.  To keep the cameras in the proper relative positions, I designed and 3D printed a [base](https://github.com/nickbild/deepclean/blob/master/3d_models/stero_cam_base.stl) and a [stabilizer](https://github.com/nickbild/deepclean/blob/master/3d_models/stereo_stabilizer.stl).
+
+The Xavier does not have CSI connections for this type of camera, so I used a pair of Raspberry Pis to capture images ([script](https://github.com/nickbild/deepclean/blob/master/remote_cam.py)) when triggered via GPIO from the Xavier.  This is far from optimal, and shows itself in the low frame rate, but it works adequately on a budget.
+
+The cameras were [calibrated](https://github.com/nickbild/deepclean/blob/master/camera_calibration/stereo_calibration.py) (individually, and in pair) in OpenCV using a printed chessboard pattern:
+
+![chessboard](https://raw.githubusercontent.com/nickbild/deepclean/master/camera_calibration/img/good/pi1_3_good.jpg)
 
 ## Media
 
