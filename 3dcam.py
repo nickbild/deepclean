@@ -36,6 +36,21 @@ rightMapX = calibration["rightMapX"]
 rightMapY = calibration["rightMapY"]
 rightROI = tuple(calibration["rightROI"])
 
+trackLo1 = []
+trackLo2 = []
+trackRo1 = []
+trackRo2 = []
+
+
+def drawTrail(trail, img):
+    if len(trail) < 2:
+        return img
+
+    for i in range(1, len(trail)):
+        img = cv2.line(img, (trail[i-1][0], trail[i-1][1]), (trail[i][0], trail[i][1]), (0, 0, 255), 15)
+
+    return img
+
 while True:
     # Capture images from Raspberry Pis.
     for output_pin in output_pins:
@@ -81,27 +96,51 @@ while True:
         #print("L wrist: {}".format(datum.poseKeypoints[0][7])) # Left wrist [x, y, score].
 
         # Raw / mean disparity in region.
-        if int(datum.poseKeypoints[0][4][0]) > 0:
-            print("Right ++++")
-            #print(disparity[int(datum.poseKeypoints[0][4][0])][int(datum.poseKeypoints[0][4][1])])
-            disparityLwrist = disparity[ int(datum.poseKeypoints[0][4][0])-20:int(datum.poseKeypoints[0][4][0])+20, int(datum.poseKeypoints[0][4][1])-20: int(datum.poseKeypoints[0][4][1])+20 ]
+        xR = int(datum.poseKeypoints[0][4][0])
+        yR = int(datum.poseKeypoints[0][4][1])
+        if (xR > 96 and xR < 231 and yR > 500) or (xR > 367 and xR < 489 and yR > 615):
+            #print("Right ++++")
+            #print(disparity[xR][yR])
+            disparityLwrist = disparity[xR-20:xR+20, yR-20:yR+20]
             print(disparityLwrist.mean())
+            
+            # Remember past locations.
+            if (xR > 96 and xR < 231 and yR > 500):
+                trackRo1.append((xR, yR))
+            else:
+                trackRo2.append((xR, yR))
         
-        if int(datum.poseKeypoints[0][7][0]) > 0:
+        xL = int(datum.poseKeypoints[0][7][0])
+        yL = int(datum.poseKeypoints[0][7][1])
+        if (xL > 96 and xL < 231 and yL > 500) or (xL > 367 and xL < 489 and yL > 615):
             #print("Left ----")
-            #print(disparity[int(datum.poseKeypoints[0][7][0])][int(datum.poseKeypoints[0][7][1])])
-            disparityRwrist = disparity[ int(datum.poseKeypoints[0][7][0])-20:int(datum.poseKeypoints[0][7][0])+20, int(datum.poseKeypoints[0][7][1])-20: int(datum.poseKeypoints[0][7][1])+20 ]
-            #print(disparityRwrist.mean())
+            #print(disparity[xL][yL])
+            disparityRwrist = disparity[xL-20:xL+20, yL-20:yL+20]
+            print(disparityRwrist.mean())
 
-        # Draw circles on image.
-        disparity = cv2.circle(disparity, (int(datum.poseKeypoints[0][4][0]), int(datum.poseKeypoints[0][4][1])), 20, (255, 0, 0), 2)
-        disparity = cv2.circle(disparity, (int(datum.poseKeypoints[0][7][0]), int(datum.poseKeypoints[0][7][1])), 20, (255, 0, 0), 2)
+            # Remember past locations.
+            if (xL > 96 and xL < 231 and yL > 500):
+                trackLo1.append((xL, yL))
+            else:
+                trackLo2.append((xL, yL))
+
+        # Draw wrist circles on image.
+        #disparity = cv2.circle(disparity, (xR, yR), 20, (255, 0, 0), 2)
+        #disparity = cv2.circle(disparity, (xL, yL), 20, (255, 0, 0), 2)
+
+        # Plot past points.
+        fixedL = drawTrail(trackLo1, fixedL)
+        fixedL = drawTrail(trackLo2, fixedL)
+        fixedR = drawTrail(trackRo1, fixedL)
+        fixedR = drawTrail(trackRo2, fixedL)
 
     except:
         print("No human detected.")
 
     # View disparity map.
     cv2.imwrite('result_distance.jpg', disparity)
+
+    cv2.imwrite('left.jpg', fixedL)
 
     # View annotated pose image.
     # newImage = datum.cvOutputData[:, :, :]
