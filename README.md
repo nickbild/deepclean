@@ -27,6 +27,12 @@ The cameras were [calibrated](https://github.com/nickbild/deepclean/blob/master/
 YouTube Video:  
 https://www.youtube.com/watch?v=Qy8Ks7UTtrA
 
+Full setup:  
+![Full Setup](https://raw.githubusercontent.com/nickbild/deepclean/master/media/full_setup_sm.jpg)
+
+Stereo Camera:  
+![camera](https://raw.githubusercontent.com/nickbild/deepclean/master/media/cameras_sm.jpg)
+
 ## Bill of Materials
 
 - 1 x NVIDIA Jetson AGX Xavier
@@ -34,6 +40,12 @@ https://www.youtube.com/watch?v=Qy8Ks7UTtrA
 - 2 x Raspberry Pi Camera v2
 - 3D printer
 - Miscellaneous wire
+
+## Future Direction
+
+With a higher budget, a more optimal version could be developed with an off the shelf stereo camera that can directly interface with the processing unit.  Using a custom-built stereo camera makes the system a little bit buggy at times, and capturing images on separate computers slows the frame rate substantially.
+
+There is also room for adding additional detection techniques.  While I believe it's useful as is, it currently can't detect a cough or sneeze, for example, which can also contaminate surfaces.
 
 ## About the Author
 
